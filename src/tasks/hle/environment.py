@@ -7,6 +7,7 @@ import os
 import random
 from typing import Tuple, Literal
 from pydantic import BaseModel
+from dotenv import load_dotenv
 
 
 from .state import StateHLE
@@ -15,11 +16,11 @@ from ... import EnvironmentFactory
 from ...typedefs import Environment, MAX_SEED
 
 from openai import OpenAI
-
+load_dotenv()
 OBS_CORRECT = "Answer is CORRECT."
 OBS_INCORRECT = "Answer is INCORRECT."
 
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY_CLAN"), timeout=300, max_retries=1)
+client = OpenAI(base_url="https://api.groq.com/openai/v1",api_key=os.getenv("OPENAI_API_KEY_CLAN"), timeout=300, max_retries=1)
 cache = Cache(".cache/judge_cache")  # folder on disk
 JUDGE_MODEL = "o3-mini"
 

@@ -1,12 +1,30 @@
+python scripts/simple/simple.py 
+    --benchmark game24 
+    --method tot_bfs 
+    --split mini 
+    --provider openai 
+    --api_key OPENAI_API_KEY_CLAN 
+    --model llama-3.1-8b-instant 
+    --temperature 1.0 
+    --max_completion_tokens 10000 
+    --top_p 1.0 
+    --batch_size 1 
+    --timeout 2.0 
+    --correctness 1 
+    --allow_batch_overflow 1 
+    --ns_ratio 0.0 
+
+
+
 #!/bin/bash
 
 benchmark="game24"
 method="tot_bfs"
 split="mini"
 
-provider="groq"
+provider="openai"
 api_key="OPENAI_API_KEY_CLAN"
-model="llama-3.1-8b-instant"
+model="gpt-4.1-nano"
 
 # Decoding parameters
 source scripts/configs/$benchmark.env
@@ -34,3 +52,6 @@ python scripts/simple/simple.py \
     --api_key "$api_key" \
     ${STOP:+--stop "$STOP"} \
     --value_cache 
+
+
+--benchmark game24 --method tot_bfs --split mini --provider groq --api_key OPENAI_API_KEY_CLAN --model llama-3.1-8b-instant --temperature 1.0 --max_completion_tokens 10000 --top_p 1.0 --batch_size 1 --timeout 2.0 --correctness 1 --allow_batch_overflow 1 --ns_ratio 0.0
