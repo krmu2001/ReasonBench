@@ -202,10 +202,10 @@ Tests use async fixtures and require valid API keys (Groq/OpenAI) for the mock L
 ## Citation
 
 ```bibtex
-@inproceedings{reasonbench2025,
-  title={ReasonBENCH: Benchmarking the (In)Stability of LLM Reasoning},
-  author={Anonymous},
-  year={2025},
-  note={Under review at ICML}
+@article{potamitis2025reasonbench,
+  title={ReasonBENCH: Benchmarking the (In) Stability of LLM Reasoning},
+  author={Potamitis, Nearchos and Klein, Lars and Arora, Akhil},
+  journal={arXiv preprint arXiv:2512.07795},
+  year={2025}
 }
 ```
