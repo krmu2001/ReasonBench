@@ -32,6 +32,7 @@ dependencies = [
     "python-dotenv",
     "cachesaver",
     "huggingface-hub",
+    "setuptools<82",
 ]
 
 [project.urls]
