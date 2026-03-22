@@ -1,5 +1,5 @@
-from langchain import Wikipedia
-from langchain.agents.react.base import DocstoreExplorer
+from langchain_community.docstore.wikipedia import Wikipedia
+from langchain_classic.agents.react.base import DocstoreExplorer
 
 import pytest
 import tempfile
