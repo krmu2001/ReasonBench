@@ -11,6 +11,7 @@
 
 import os
 import sys
+from typing import Counter
 
 from dotenv import load_dotenv
 from openai import OpenAI
@@ -62,12 +63,31 @@ def get_llm_response(model, query, sysquery=None, temperature=0.0):
 
 
 
+def evalquerys(amountOfTimes,query):
+    answers = []
+    for i in range(amountOfTimes): # 0 to 4 when typing 5
+        answers.append( get_llm_response(groq_ins, query))
+    return answers
 
-print(get_llm_response(groq_ins, "What is 2+2"))
-print("=="*30)
-print(get_llm_response(groq_ver, "What is 2 * 3"))
-print("=="*30)
-print(get_llm_response(groq_ver, "What is 2 * 3", "You are a math teacher"))
+
+
+def judgeA(answer):
+    counts = Counter(answer)
+    most_common = counts.most_common(1)[0][0]
+    return most_common
+
+
+eval = evalquerys(3,"What is 2+2")
+print(eval)
+print(judgeA(eval))
+
+
+# print(get_llm_response(groq_ins, "What is 2+2"))
+# print("=="*30)
+# print(get_llm_response(groq_ver, "What is 2 * 3"))
+# print("=="*30)
+# print(get_llm_response(groq_ver, "What is 2 * 3", "You are a math teacher"))
+
 
 #####
 #### This code need to be set up the signature from reasonbench
