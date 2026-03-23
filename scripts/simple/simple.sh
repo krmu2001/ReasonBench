@@ -5,7 +5,7 @@ method="tot_bfs"
 split="mini"
 
 provider="groq"
-api_key="OPENAI_API_KEY_CLAN"
+api_key="OPENAI_API_KEY"
 model="llama-3.1-8b-instant"
 
 # Decoding parameters
