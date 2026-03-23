@@ -4,9 +4,9 @@ benchmark="game24"
 method="tot_bfs"
 split="mini"
 
-provider="openai"
+provider="groq"
 api_key="OPENAI_API_KEY"
-model="gpt-4.1-nano"
+model="llama-3.1-8b-instant"
 
 # Decoding parameters
 source scripts/configs/$benchmark.env

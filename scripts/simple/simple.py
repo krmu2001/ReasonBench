@@ -11,9 +11,6 @@ logger = logging.getLogger(__name__)
 
 from cachesaver.pipelines import OnlineAPI
 
-from dotenv import load_dotenv
-load_dotenv()
-
 import sys
 sys.path.append(os.getcwd())
 

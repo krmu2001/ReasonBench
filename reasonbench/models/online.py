@@ -102,8 +102,9 @@ def client_init(provider: str, api_key: str) -> Any:
             api_key = os.getenv(api_key),
             base_url="https://api.groq.com/openai/v1/"
         )
+        return client
     
-    
+
     else:
         raise ValueError(f"Unknown provider: {provider}")
     
