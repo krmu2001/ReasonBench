@@ -95,6 +95,13 @@ def client_init(provider: str, api_key: str) -> Any:
         from together import AsyncTogether
         client = AsyncTogether(api_key=os.getenv(api_key))
         return client
+
+    elif provider == "groq":
+        from openai import AsyncOpenAI
+        client = AsyncOpenAI(
+            api_key = os.getenv(api_key),
+            base_url="https://api.groq.com/openai/v1/"
+        )
     
     
     else:
