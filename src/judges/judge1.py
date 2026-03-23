@@ -44,7 +44,7 @@ client = Groq(
     api_key=os.environ.get("OPENAI_API_KEY_CLAN"),
 )
 
-def get_llm_response(model, query, sysquery=None, temperature=0.0):
+def get_llm_response(model, query, sysquery=None, temperature=1.2):
     messageQuery = []
 
     if sysquery is not None:
@@ -67,6 +67,7 @@ def evalquerys(amountOfTimes,query):
     answers = []
     for i in range(amountOfTimes): # 0 to 4 when typing 5
         answers.append( get_llm_response(groq_ins, query))
+        answers.append(get_llm_response(groq_ver, query))
     return answers
 
 
@@ -76,10 +77,20 @@ def judgeA(answer):
     most_common = counts.most_common(1)[0][0]
     return most_common
 
+##JUDGE A
+eval_answers = evalquerys(10, "What color should a car be? Answer with only one color.")
+# print("Eval" + "="*30)
+#print(eval_answers)
+# print("JudgeEval" + "="*30)
+# print(judgeA(eval_answers))
+##JUDGE A END
+## JUDGE C
+answers_str = ", ".join(eval_answers)
+print(answers_str)
+print("=="*30)
+print(get_llm_response(groq_ins, f"Answers: {answers_str}","You are a judge what do you think the correct answer is, and why?, the question is: What color should a car be? Answer with only one color. "))
 
-eval = evalquerys(3,"What is 2+2")
-print(eval)
-print(judgeA(eval))
+## JUDGE C END
 
 
 # print(get_llm_response(groq_ins, "What is 2+2"))
@@ -104,7 +115,7 @@ print(judgeA(eval))
 #     def __init__(self,
 #                  model: Model,
 #                  agents: AgentDictCoT,
-#                  env: Environment,
+#                  nv: Environment,
 #                  config: OmegaConf,
 #                  ):
 #         super().__init__(model, agents, env, config)
