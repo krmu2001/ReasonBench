@@ -10,6 +10,8 @@
 # logger = logging.getLogger(__name__)
 
 import os
+import sys
+
 from dotenv import load_dotenv
 from openai import OpenAI
 from groq import Groq
@@ -22,25 +24,50 @@ load_dotenv()
 groq_ins = os.getenv("LLM_1")
 groq_ver = os.getenv("LLM_2")
 
+missing_in_env = []
+
+if groq_ins is None:
+    missing_in_env.append("LLM_1")
+
+if groq_ver is None:
+    missing_in_env.append("LLM_2")
+
+
+if missing_in_env:
+    print(f"Missing environment variables: {', '.join(missing_in_env)}")
+    sys.exit(1)
+
+
 #print(groq_ins, groq_ver)
 client = Groq(
     api_key=os.environ.get("OPENAI_API_KEY_CLAN"),
 )
 
-def get_llm_response(model, query, temperature=0.0):
+def get_llm_response(model, query, sysquery=None, temperature=0.0):
+    messageQuery = []
+
+    if sysquery is not None:
+        messageQuery.append({
+            "role": "system",
+            "content": sysquery
+        })
+    messageQuery.append({"role": "user", "content": query})
+
     response = client.chat.completions.create(
         model=model,
-        messages=[
-            {"role": "user", "content": query}
-        ],
+        messages=messageQuery,
         temperature=temperature,
     )
     return response.choices[0].message.content.strip()
 
-print(get_llm_response(groq_ins, "What is 2+2"))
 
+
+
+print(get_llm_response(groq_ins, "What is 2+2"))
 print("=="*30)
-print(get_llm_response(groq_ver, "Explain 2 * 3"))
+print(get_llm_response(groq_ver, "What is 2 * 3"))
+print("=="*30)
+print(get_llm_response(groq_ver, "What is 2 * 3", "You are a math teacher"))
 
 #####
 #### This code need to be set up the signature from reasonbench
