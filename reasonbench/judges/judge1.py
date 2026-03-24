@@ -17,10 +17,12 @@ from dotenv import load_dotenv
 from openai import OpenAI
 from groq import Groq
 
+from reasonbench import MethodFactory
+
 load_dotenv()
 
 
-#client = OpenAI(base_url="https://api.groq.com/openai/v1",api_key=os.getenv("OPENAI_API_KEY_CLAN"), timeout=300, max_retries=1)
+#client = OpenAI(base_url="https://api.groq.com/openai/v1",api_key=os.getenv("OPENAI_API_KEY"), timeout=300, max_retries=1)
 
 groq_ins = os.getenv("LLM_1")
 groq_ver = os.getenv("LLM_2")
@@ -41,7 +43,7 @@ if missing_in_env:
 
 #print(groq_ins, groq_ver)
 client = Groq(
-    api_key=os.environ.get("OPENAI_API_KEY_CLAN"),
+    api_key=os.environ.get("OPENAI_API_KEY"),
 )
 
 def get_llm_response(model, query, sysquery=None, temperature=1.2):
@@ -79,16 +81,16 @@ def judgeA(answer):
 
 ##JUDGE A
 eval_answers = evalquerys(10, "What color should a car be? Answer with only one color.")
-# print("Eval" + "="*30)
-#print(eval_answers)
-# print("JudgeEval" + "="*30)
-# print(judgeA(eval_answers))
+print("Eval" + "="*30)
+print(eval_answers)
+print("JudgeEval" + "="*30)
+print(judgeA(eval_answers))
 ##JUDGE A END
 ## JUDGE C
-answers_str = ", ".join(eval_answers)
-print(answers_str)
-print("=="*30)
-print(get_llm_response(groq_ins, f"Answers: {answers_str}","You are a judge what do you think the correct answer is, and why?, the question is: What color should a car be? Answer with only one color. "))
+# answers_str = ", ".join(eval_answers)
+# print(answers_str)
+# print("=="*30)
+# print(get_llm_response(groq_ins, f"Answers: {answers_str}","You are a judge what do you think the correct answer is, and why?, the question is: What color should a car be? Answer with only one color. "))
 
 ## JUDGE C END
 
