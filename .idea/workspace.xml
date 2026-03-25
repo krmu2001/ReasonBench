@@ -4,9 +4,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="f261096e-8376-4300-a224-8eade0ac12c4" name="Changes" comment="">
+    <list default="true" id="f261096e-8376-4300-a224-8eade0ac12c4" name="Changes" comment="judgeA.py under way">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/reasonbench/judges/judgeA.py" beforeDir="false" afterPath="$PROJECT_DIR$/reasonbench/judges/judgeA.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/reasonbench/judges/judgeTestSuite.py" beforeDir="false" afterPath="$PROJECT_DIR$/reasonbench/judges/judgeTestSuite.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -331,7 +330,15 @@
       <option name="project" value="LOCAL" />
       <updated>1774438638115</updated>
     </task>
-    <option name="localTasksCounter" value="10" />
+    <task id="LOCAL-00010" summary="judgeA.py under way">
+      <option name="closed" value="true" />
+      <created>1774444900238</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1774444900238</updated>
+    </task>
+    <option name="localTasksCounter" value="11" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -346,11 +353,12 @@
     <MESSAGE value="Basic run of cachesaver" />
     <MESSAGE value="Basic run of cachesaver 1" />
     <MESSAGE value="judgeA.py start" />
-    <option name="LAST_COMMIT_MESSAGE" value="judgeA.py start" />
+    <MESSAGE value="judgeA.py under way" />
+    <option name="LAST_COMMIT_MESSAGE" value="judgeA.py under way" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/Bench$testpy.coverage" NAME="testpy Coverage Results" MODIFIED="1774002452158" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/src/judges" />
-    <SUITE FILE_PATH="coverage/Bench$judgeTestSuite.coverage" NAME="judgeTestSuite Coverage Results" MODIFIED="1774444763712" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/reasonbench/judges" />
+    <SUITE FILE_PATH="coverage/Bench$judgeTestSuite.coverage" NAME="judgeTestSuite Coverage Results" MODIFIED="1774444850336" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/reasonbench/judges" />
     <SUITE FILE_PATH="coverage/Bench$judgeA.coverage" NAME="judgeA Coverage Results" MODIFIED="1774438892070" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/reasonbench/judges" />
     <SUITE FILE_PATH="coverage/Bench$testpy2.coverage" NAME="testpy2 Coverage Results" MODIFIED="1774435632259" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/reasonbench/judges" />
     <SUITE FILE_PATH="coverage/Bench$Judge1.coverage" NAME="Judge1 Coverage Results" MODIFIED="1774363913190" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="" />

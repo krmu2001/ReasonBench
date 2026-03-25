@@ -19,6 +19,7 @@ async def main():
     provider = "groq"  # eller "groq"
     api_key = "GROQ_API_KEY"
     model_name = "llama-3.1-8b-instant"  # eller groq model
+    model_name2 = "llama-3.3-70b-versatile"  # eller groq model
 
     print("API key loaded:", bool(os.getenv(api_key)))
     # ---- Cache ----
@@ -49,6 +50,12 @@ async def main():
         log_path="logs/test.log"
     )
 
+    api2 = API(
+        pipeline=pipeline,
+        model=model_name2,
+        log_path="logs/test.log"
+    )
+
     # ---- Decoding params ----
     params = DecodingParameters(
         temperature=0.0,
@@ -58,32 +65,21 @@ async def main():
         logprobs=False
     )
 
-    # # ---- CALL ----
-    # async def ask_llm(prompt, n=1, request_id="idx0-ask", namespace="default"):
-    #     response = await api.request(
-    #         prompt=prompt,
-    #         n=n,
-    #         request_id=request_id,
-    #         namespace=namespace,
-    #         params=params
-    #     )
-    #     return response
-    #
-    #
-    #
-    #
-    # response = await ask_llm("explain 2+2 * 3")
-    #
-    # print(response)
+    def outputResult(result):
+        print("Prompt:", result["prompt"])
+        print("Answers:", result["answers"])
+        print("Counts:", result["counts"])
+        print("Majority answer:", result["majority_answer"])
+        print("Majority count:", result["majority_count"])
+        print("Repeats:", result["repeats"])
+
 
     # JUDGE A
     result = await judge_a(api, params,"What is a good color for a car? Answer with one word.",10)
-    print("Prompt:", result["prompt"])
-    print("Answers:", result["answers"])
-    print("Counts:", result["counts"])
-    print("Majority answer:", result["majority_answer"])
-    print("Majority count:", result["majority_count"])
-    print("Repeats:", result["repeats"])
+    result2 = await judge_a(api2, params,"What is a good color for a car? Answer with one word.",10)
+    outputResult(result)
+    print("======"*15)
+    outputResult(result2)
 
 
 if __name__ == "__main__":
@@ -102,3 +98,21 @@ if __name__ == "__main__":
     # )
     #
     # print("Response:", response)
+
+    # # ---- CALL ----
+    # async def ask_llm(prompt, n=1, request_id="idx0-ask", namespace="default"):
+    #     response = await api.request(
+    #         prompt=prompt,
+    #         n=n,
+    #         request_id=request_id,
+    #         namespace=namespace,
+    #         params=params
+    #     )
+    #     return response
+    #
+    #
+    #
+    #
+    # response = await ask_llm("explain 2+2 * 3")
+    #
+    # print(response)
