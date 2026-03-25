@@ -1,54 +1,73 @@
 import os
-import time
 import asyncio
-import argparse
-
 from diskcache import Cache
-from omegaconf import OmegaConf
-
-import logging
-logger = logging.getLogger(__name__)
 
 from cachesaver.pipelines import OnlineAPI
+from dotenv import load_dotenv
 
-import sys
-sys.path.append(os.getcwd())
-
-from reasonbench import BenchmarkFactory, EnvironmentFactory, MethodFactory
-from reasonbench.tasks import *
-from reasonbench.methods import *
 from reasonbench.models import OnlineLLM, API
 from reasonbench.typedefs import DecodingParameters
 
-from reasonbench.utils import initial_logging, final_logging
-
-# Cache directory
-os.makedirs(os.path.dirname(cache_path), exist_ok=True)
-cache = Cache(cache_path)
-
-model = OnlineLLM(provider=args.provider, api_key=args.api_key, reasoning_effort=args.reasoning_effort)
-
-# Pipeline
-pipeline = OnlineAPI(
-    model=model,
-    cache=cache,
-    batch_size=args.batch_size,
-    timeout=args.timeout,
-    allow_batch_overflow=args.allow_batch_overflow,
-    correctness=bool(args.correctness)
-)
-
-# API
-api = API(
-    pipeline=pipeline,
-    model=args.model,
-    log_path=f"logs/raw_calls/simple/{args.model}/{args.benchmark}/{args.method}_{args.split}.log"
-)
+load_dotenv()
 
 
-response = await api.complete(
-    messages=[{"role": "user", "content": "hvad er 2+2"}],
-    decoding_params=params
-)
+async def main():
+    # ---- Hardcoded config ----
+    #print(os.getenv("GROQ_API_KEY"))
+    cache_path = "caches/dev"
+    provider = "groq"  # eller "groq"
+    api_key = "GROQ_API_KEY"
+    model_name = "llama-3.1-8b-instant"  # eller groq model
 
-print(response)
+    print("API key loaded:", bool(os.getenv(api_key)))
+    # ---- Cache ----
+    os.makedirs(cache_path, exist_ok=True)
+    cache = Cache(cache_path)
+
+    # ---- Model ----
+    model = OnlineLLM(
+        provider=provider,
+        api_key=api_key,
+        reasoning_effort=None
+    )
+
+    # ---- Pipeline ----
+    pipeline = OnlineAPI(
+        model=model,
+        cache=cache,
+        batch_size=1,
+        timeout=30,
+        allow_batch_overflow=True,
+        correctness=False
+    )
+
+    # ---- API wrapper ----
+    api = API(
+        pipeline=pipeline,
+        model=model_name,
+        log_path="logs/test.log"
+    )
+
+    # ---- Decoding params ----
+    params = DecodingParameters(
+        temperature=0.0,
+        max_completion_tokens=50,
+        top_p=1.0,
+        stop=None,
+        logprobs=False
+    )
+
+    # ---- CALL ----
+    response = await api.request(
+        prompt="explain what google is",
+        n=1,
+        request_id="idx0-test",
+        namespace="test",
+        params=params
+    )
+
+    print("Response:", response)
+
+
+if __name__ == "__main__":
+    asyncio.run(main())

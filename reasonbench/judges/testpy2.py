@@ -59,7 +59,7 @@ async def main():
 
     # ---- CALL ----
     response = await api.request(
-        prompt="hvad er 2+2",
+        prompt="explain what google is",
         n=1,
         request_id="idx0-test",
         namespace="test",
