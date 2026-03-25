@@ -5,6 +5,7 @@ from diskcache import Cache
 from cachesaver.pipelines import OnlineAPI
 from dotenv import load_dotenv
 
+from reasonbench.judges.judgeA import judge_a
 from reasonbench.models import OnlineLLM, API
 from reasonbench.typedefs import DecodingParameters
 
@@ -57,22 +58,32 @@ async def main():
         logprobs=False
     )
 
-    # ---- CALL ----
-    async def ask_llm(prompt, n=1, request_id="idx0-ask", namespace="default"):
-        response = await api.request(
-            prompt=prompt,
-            n=n,
-            request_id=request_id,
-            namespace=namespace,
-            params=params
-        )
-        return response
+    # # ---- CALL ----
+    # async def ask_llm(prompt, n=1, request_id="idx0-ask", namespace="default"):
+    #     response = await api.request(
+    #         prompt=prompt,
+    #         n=n,
+    #         request_id=request_id,
+    #         namespace=namespace,
+    #         params=params
+    #     )
+    #     return response
+    #
+    #
+    #
+    #
+    # response = await ask_llm("explain 2+2 * 3")
+    #
+    # print(response)
 
-
-
-    response = await ask_llm("explain 2+2 * 3")
-
-    print(response)
+    # JUDGE A
+    result = await judge_a(api, params,"What is a good color for a car? Answer with one word.",10)
+    print("Prompt:", result["prompt"])
+    print("Answers:", result["answers"])
+    print("Counts:", result["counts"])
+    print("Majority answer:", result["majority_answer"])
+    print("Majority count:", result["majority_count"])
+    print("Repeats:", result["repeats"])
 
 
 if __name__ == "__main__":
