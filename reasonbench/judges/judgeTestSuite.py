@@ -14,12 +14,11 @@ load_dotenv()
 
 async def main():
     # ---- Hardcoded config ----
-    #print(os.getenv("GROQ_API_KEY"))
     cache_path = "caches/dev"
-    provider = "groq"  # eller "groq"
+    provider = "groq"
     api_key = "GROQ_API_KEY"
-    model_name = "llama-3.1-8b-instant"  # eller groq model
-    model_name2 = "llama-3.3-70b-versatile"  # eller groq model
+    model_name = "llama-3.1-8b-instant"
+    model_name2 = "llama-3.3-70b-versatile"
 
     print("API key loaded:", bool(os.getenv(api_key)))
     # ---- Cache ----
