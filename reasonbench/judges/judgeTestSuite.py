@@ -5,7 +5,7 @@ from diskcache import Cache
 from cachesaver.pipelines import OnlineAPI
 from dotenv import load_dotenv
 
-from reasonbench.judges.judgeA import judge_a
+from reasonbench.judges.judgeA import JudgeA
 from reasonbench.models import OnlineLLM, API
 from reasonbench.typedefs import DecodingParameters
 
@@ -74,11 +74,17 @@ async def main():
 
 
     # JUDGE A
-    result = await judge_a(api, params,"What is a good color for a car? Answer with one word.",10)
-    result2 = await judge_a(api2, params,"What is a good color for a car? Answer with one word.",10)
-    outputResult(result)
+    judge1 = JudgeA(api,params,10)
+    judge2 = JudgeA(api,params,10)
+
+    result3 = await judge1.run("What is a good color for a car? Answer with one word.")
+    result4 = await judge2.run("What is a good color for a car? Answer with one word.")
+
+    #result = await judge_a(api, params,"What is a good color for a car? Answer with one word.",10)
+    #result2 = await judge_a(api2, params,"What is a good color for a car? Answer with one word.",10)
+    outputResult(result3)
     print("======"*15)
-    outputResult(result2)
+    outputResult(result4)
 
 
 if __name__ == "__main__":
