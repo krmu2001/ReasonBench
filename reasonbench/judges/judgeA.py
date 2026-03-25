@@ -12,12 +12,6 @@ from reasonbench.typedefs import DecodingParameters
 
 load_dotenv()
 
-
-
-
-def counter():
-    return 0
-
 async def judge_a(api, params, prompt, repeats=10, namespace="judgeA"):
     answers = []
 
