@@ -4,8 +4,10 @@ from typing import List, Any
 from dataclasses import dataclass
 
 from cachesaver.typedefs import Request, Batch, Response
+from dotenv import load_dotenv
 
 from ..typedefs import Model
+load_dotenv()
 
 class OnlineLLM(Model):
     def __init__(self, provider: str, max_n: int = 128, api_key: str=None, reasoning_effort=None):
@@ -80,7 +82,17 @@ def client_init(provider: str, api_key: str) -> Any:
             base_url="https://generativelanguage.googleapis.com/v1beta/openai/"
         )
         return client
-    
+
+        # Groq - Llama/Mixtral
+    elif provider == "groq":
+        from openai import AsyncOpenAI
+
+        client = AsyncOpenAI(
+            api_key=os.getenv(api_key),
+            base_url="https://api.groq.com/openai/v1"
+        )
+        return client
+
     # Anthropic - Claude
     elif provider == "anthropic":
         from openai import AsyncOpenAI

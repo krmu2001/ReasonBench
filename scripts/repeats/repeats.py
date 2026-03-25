@@ -14,13 +14,13 @@ from cachesaver.pipelines import OnlineAPI
 import sys
 sys.path.append(os.getcwd())
 
-from src import BenchmarkFactory, EnvironmentFactory, MethodFactory
-from src.tasks import *
-from src.methods import *
-from src.models import OnlineLLM, API
-from src.typedefs import DecodingParameters
+from reasonbench import BenchmarkFactory, EnvironmentFactory, MethodFactory
+from reasonbench.tasks import *
+from reasonbench.methods import *
+from reasonbench.models import OnlineLLM, API
+from reasonbench.typedefs import DecodingParameters
 
-from src.utils import initial_logging, final_logging
+from reasonbench.utils import initial_logging, final_logging
 
 
 async def run(args, cache_path):
