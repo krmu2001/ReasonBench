@@ -1,35 +1,28 @@
-import os
-import asyncio
 from typing import Counter
+from reasonbench.typedefs import Judge
 
-from diskcache import Cache
-
-from cachesaver.pipelines import OnlineAPI
 from dotenv import load_dotenv
-
-from reasonbench.models import OnlineLLM, API
-from reasonbench.typedefs import DecodingParameters
 
 load_dotenv()
 
-class JudgeA:
+class JudgeA(Judge):
     def __init__(self, api, params, repeats=10, namespace="judgeA"):
         self.api = api
         self.params = params
         self.repeats = repeats
         self.namespace = namespace
 
-    async def ask_once(self,prompt,request_id):
+    async def ask_once(self, prompt, request_id):
         response = await self.api.request(
-                    prompt=prompt,
-                    n=1,
-                    request_id=request_id,
-                    namespace=self.namespace,
-                    params=self.params
+                    prompt = prompt,
+                    n = 1,
+                    request_id = request_id,
+                    namespace = self.namespace,
+                    params = self.params
                 )
         return response
 
-    async def run(self, prompt):
+    async def solve(self, prompt):
         answers = []
 
         for i in range(self.repeats):

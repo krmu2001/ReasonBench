@@ -6,11 +6,11 @@ from cachesaver.pipelines import OnlineAPI
 from dotenv import load_dotenv
 
 from reasonbench.judges.judgeA import JudgeA
+from reasonbench.judges.judgeB import JudgeB
 from reasonbench.models import OnlineLLM, API
 from reasonbench.typedefs import DecodingParameters
 
 load_dotenv()
-
 
 async def main():
     # ---- Hardcoded config ----
@@ -19,6 +19,7 @@ async def main():
     api_key = "GROQ_API_KEY"
     model_name = "llama-3.1-8b-instant"
     model_name2 = "llama-3.3-70b-versatile"
+    model_name3 = "openai/gpt-oss-20b"
 
     print("API key loaded:", bool(os.getenv(api_key)))
     # ---- Cache ----
@@ -43,7 +44,7 @@ async def main():
     )
 
     # ---- API wrapper ----
-    api = API(
+    api1 = API(
         pipeline=pipeline,
         model=model_name,
         log_path="logs/test.log"
@@ -52,6 +53,12 @@ async def main():
     api2 = API(
         pipeline=pipeline,
         model=model_name2,
+        log_path="logs/test.log"
+    )
+
+    api3 = API(
+        pipeline=pipeline,
+        model=model_name3,
         log_path="logs/test.log"
     )
 
@@ -64,7 +71,7 @@ async def main():
         logprobs=False
     )
 
-    def outputResult(result):
+    def outputResultJudgeA(result):
         print("Prompt:", result["prompt"])
         print("Answers:", result["answers"])
         print("Counts:", result["counts"])
@@ -72,49 +79,37 @@ async def main():
         print("Majority count:", result["majority_count"])
         print("Repeats:", result["repeats"])
 
+    def outputResultJudgeB(result):
+        print("Prompt:", result["prompt"])
+        print("Answers:", result["answers"])
+        print("Answers by Judge:", result["answers_by_judge"])
+        print("Judges:", result["judges"])
+        print("Repeats:", result["repeats"])
+
 
     # JUDGE A
-    judge1 = JudgeA(api,params,10)
-    judge2 = JudgeA(api,params,10)
+    judge1 = JudgeA(api1,params,10)
+    judge2 = JudgeA(api2,params,10)
 
-    result1 = await judge1.run("What is a good color for a car? Answer with one word.")
-    result2 = await judge2.run("What is a good color for a car? Answer with one word.")
-    outputResult(result1)
+    # JUDGE B
+    judge3 = JudgeB(
+        apis=[api1, api2, api3],
+        params=params,
+        repeats=5
+    )
+
+    questionForA = "What is a good color for a car? Answer with one word."
+    questionForB = "What is a good color for a car? Answer with one word."
+
+    result1 = await judge1.solve(questionForA)
+    result2 = await judge2.solve(questionForA)
+    result3 = await judge3.solve(questionForB)
+    outputResultJudgeA(result1)
     print("======"*15)
-    outputResult(result2)
+    outputResultJudgeA(result2)
+    print("======"*15)
+    outputResultJudgeB(result3)
 
 
 if __name__ == "__main__":
     asyncio.run(main())
-
-
-
-
-
-    # response = await api.request(
-    #     prompt="explain what google is",
-    #     n=1,
-    #     request_id="idx0-test",
-    #     namespace="test",
-    #     params=params
-    # )
-    #
-    # print("Response:", response)
-
-    # # ---- CALL ----
-    # async def ask_llm(prompt, n=1, request_id="idx0-ask", namespace="default"):
-    #     response = await api.request(
-    #         prompt=prompt,
-    #         n=n,
-    #         request_id=request_id,
-    #         namespace=namespace,
-    #         params=params
-    #     )
-    #     return response
-    #
-    #
-    #
-    #
-    # response = await ask_llm("explain 2+2 * 3")
-    #
-    # print(response)

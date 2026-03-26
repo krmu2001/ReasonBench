@@ -109,6 +109,11 @@ class Agent(ABC):
     @abstractmethod
     def act(model: Model, state: State) -> Any:
         pass
+
+class Judge(ABC):
+    @abstractmethod
+    def solve(self, prompt) -> Any:
+        pass
     
 class Method(ABC):
     def __init__(self, model: Model, agents: dict[str, Agent], env: Environment, config: OmegaConf):
