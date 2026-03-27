@@ -91,9 +91,10 @@ async def main():
     judge1 = JudgeA(api1,params,10)
     judge2 = JudgeA(api2,params,10)
 
+    apis = [api1, api2, api3]
     # JUDGE B
     judge3 = JudgeB(
-        apis=[api1, api2, api3],
+        api=api1,
         params=params,
         repeats=5
     )

@@ -7,23 +7,10 @@ from reasonbench.typedefs import Judge
 load_dotenv()
 
 class JudgeB(Judge):
-    def __init__(self,
-                 apis: List,
-                 params,
-                 repeats=10,
-                 judges=None,
-                 namespace="judgeB"
-    ):
-        self.apis = apis
+    def __init__(self, api, params, repeats=10, judges=None, namespace="judgeB"):
+        self.api = api
         self.params = params
         self.repeats = repeats
-        if judges is None:
-            judges = [
-                os.getenv("LLM_1"),
-                os.getenv("LLM_2"),
-                os.getenv("LLM_3"),
-            ]
-        self.judges = judges
         self.namespace = namespace
 
     async def eval(self, prompt, request_id, api):
@@ -35,6 +22,24 @@ class JudgeB(Judge):
             params = self.params,
         )
         return response
+
+    async def eval_amount(self, amount, prompt):
+        answers = []
+        for i in range(amount):
+            request_id = f"idx0-judgeB-{i}"
+            answer = await self.eval(prompt, request_id,self.api)
+            answers.append(answer)
+        return answers
+
+
+    async def multiple_judges(self, prompt, apis: List):
+        responses = self.eval_amount(10, prompt)
+        res_tostring = "".join(responses)
+        dif_judges = []
+        for i in range(apis.__sizeof__()):
+            request_id = f"idx0-judgeB-apis-{i}"
+            answer = await self.eval(res_tostring, request_id, apis[i])
+            dif_judges.append(answer)
 
     async def solve(self, prompt):
         answers = []
