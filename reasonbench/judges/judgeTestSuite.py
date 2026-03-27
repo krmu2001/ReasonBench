@@ -100,14 +100,14 @@ async def main():
 
     questionForA = "What is a good color for a car? Answer with one word."
     questionForB = "What is a good color for a car? Answer with one word."
-
-    result1 = await judge1.solve(questionForA)
-    result2 = await judge2.solve(questionForA)
+    #
+    # result1 = await judge1.solve(questionForA)
+    # result2 = await judge2.solve(questionForA)
     result3 = await judge3.solve(questionForB)
-    outputResultJudgeA(result1)
-    print("======"*15)
-    outputResultJudgeA(result2)
-    print("======"*15)
+    # outputResultJudgeA(result1)
+    # print("======"*15)
+    # outputResultJudgeA(result2)
+    # print("======"*15)
     outputResultJudgeB(result3)
 
 
