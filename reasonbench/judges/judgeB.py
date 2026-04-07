@@ -7,11 +7,12 @@ from reasonbench.typedefs import Judge
 load_dotenv()
 
 class JudgeB(Judge):
-    def __init__(self, api, params, repeats=10, judges=None, namespace="judgeB"):
+    def __init__(self, api, params,api_list, repeats=10, judges=None, namespace="judgeB"):
         self.api = api
         self.params = params
         self.repeats = repeats
         self.namespace = namespace
+        self.api_list = api_list
 
     async def eval(self, prompt, request_id, api):
         response = await api.request(
@@ -21,11 +22,11 @@ class JudgeB(Judge):
             namespace = self.namespace,
             params = self.params,
         )
-        return response
+        return response[0]
 
-    async def eval_amount(self, amount, prompt):
+    async def eval_amount(self, prompt):
         answers = []
-        for i in range(amount):
+        for i in range(self.repeats):
             request_id = f"idx0-judgeB-{i}"
             answer = await self.eval(prompt, request_id,self.api)
             answers.append(answer)
@@ -33,32 +34,69 @@ class JudgeB(Judge):
 
 
     async def multiple_judges(self, prompt, apis: List):
-        responses = self.eval_amount(10, prompt)
-        res_tostring = "".join(responses)
+        responses = await self.eval_amount(prompt)
+        res_tostring = "".join(response for response in responses)
+
+        print(res_tostring, "Hello there")
+        judge_prompt = f"""
+        You are a judge.
+
+        The original question:
+        {prompt}
+
+        Candidate answers:
+        {res_tostring}
+
+        Choose the best answer and why.
+        """
         dif_judges = []
-        for i in range(apis.__sizeof__()):
+        for i, api in enumerate(apis):
             request_id = f"idx0-judgeB-apis-{i}"
-            answer = await self.eval(res_tostring, request_id, apis[i])
+            answer = await self.eval(judge_prompt, request_id, api)
             dif_judges.append(answer)
 
+        return dif_judges
+
+
+    async def eval_multiple_judges(self, responses):
+        final_prompt = f"""
+        You are a judge.
+        Candidate answers:
+        {responses}
+
+        Choose the best answer and why.
+        """
+        request_id = f"idx0-judgeB-final"
+        result = await self.eval(final_prompt, request_id, self.api)
+        return result
+
+
+
+
     async def solve(self, prompt):
-        answers = []
-        answers_by_judge = {}
+        responses = await self.multiple_judges(prompt,self.api_list)
 
-        for judge, api in enumerate(self.apis):
-            judge_name = api.model
-            answers_by_judge[judge_name] = []
-
-            for i in range(self.repeats):
-                request_id = f"idx0-judgeB--{judge}-{i}"
-                response = await self.eval(prompt, request_id, api=api)
-                answers.append(response)
-                answers_by_judge[judge_name].append(response)
+        answers = await self.eval_multiple_judges(responses)
 
         return {
             "prompt": prompt,
             "answers": answers,
-            "answers_by_judge": answers_by_judge,
-            "judges": [api.model for api in self.apis],
+            "answers_by_judge": responses,
+            "judges": [api.model for api in self.api_list],
             "repeats": self.repeats
         }
+
+
+ #
+ # answers = []
+ #        answers_by_judge = {}
+ #
+ #        for judge, api in enumerate(self.apis):
+ #            judge_name = api.model
+ #            answers_by_judge[judge_name] = []
+ #
+ #            for i in range(self.repeats):
+ #                request_id = f"idx0-judgeB--{judge}-{i}"
+ #                response = await self.eval(prompt, request_id, api=api)
+ #                answers.append(response)
+ #                answers_by_judge[judge_name].append(response)

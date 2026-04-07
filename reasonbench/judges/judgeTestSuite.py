@@ -88,15 +88,15 @@ async def main():
 
 
     # JUDGE A
-    judge1 = JudgeA(api1,params,10)
-    judge2 = JudgeA(api2,params,10)
+    #judge1 = JudgeA(api1,params,10)
+    #judge2 = JudgeA(api2,params,10)
 
-    apis = [api1, api2, api3]
+    apis = [api1, api2]
     # JUDGE B
     judge3 = JudgeB(
         api=api1,
-        params=params,
-        repeats=5
+        params=params,api_list=apis,
+        repeats=10
     )
 
     questionForA = "What is a good color for a car? Answer with one word."
@@ -105,11 +105,15 @@ async def main():
     # result1 = await judge1.solve(questionForA)
     # result2 = await judge2.solve(questionForA)
     result3 = await judge3.solve(questionForB)
+    #testresult = await judge3.multiple_judges(questionForB,apis)
+
     # outputResultJudgeA(result1)
     # print("======"*15)
     # outputResultJudgeA(result2)
     # print("======"*15)
-    outputResultJudgeB(result3)
+    #outputResultJudgeB(testresult)
+    #print(testresult)
+    print(result3)
 
 
 if __name__ == "__main__":
