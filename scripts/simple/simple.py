@@ -15,7 +15,7 @@ import sys
 sys.path.append(os.getcwd())
 
 from reasonbench import BenchmarkFactory, EnvironmentFactory, MethodFactory
-from reasonbench.tasks import *
+from reasonbench.tasks import load_task
 from reasonbench.methods import *
 from reasonbench.models import OnlineLLM, API
 from reasonbench.typedefs import DecodingParameters
@@ -24,7 +24,8 @@ from reasonbench.utils import initial_logging, final_logging
 
 
 async def run(args, trial, cache_path):
-    
+    load_task(args.benchmark)
+
     # Cache directory
     os.makedirs(os.path.dirname(cache_path), exist_ok=True)
     cache = Cache(cache_path)
@@ -72,7 +73,7 @@ async def run(args, trial, cache_path):
         model=api,
         env=environment,
         config=config)
-    
+
 
     # Benchmark
     benchmark = BenchmarkFactory.get(args.benchmark, split=args.split, max_len=50)
@@ -84,7 +85,7 @@ async def run(args, trial, cache_path):
     # Start timing
     start = time.perf_counter()
 
-    # Run the method 
+    # Run the method
     durations, results = await method.benchmark(
         benchmark=benchmark,
         ns_ratio=args.ns_ratio,

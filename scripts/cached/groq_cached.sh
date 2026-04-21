@@ -1,12 +1,22 @@
 #!/bin/bash
 
 benchmark="game24"
-method="tot_bfs"
-split="mini"
+method="io"
+split="single"
+repeats=5
 
-provider="openai"
-api_key="OPENAI_API_KEY"
-model="gpt-4.1-nano"
+provider="groq"
+api_key="GROQ_API_KEY"
+
+# Free tier limits:
+#   TPM - 6K
+#   TPD - 500K
+#model="llama-3.1-8b-instant"
+
+# Free tier limits:
+#   TPM - 12K
+#   TPD - 100K
+model="llama-3.3-70b-versatile"
 
 # Decoding parameters
 source scripts/configs/$benchmark.env
@@ -16,7 +26,7 @@ if [[ "$method" == "io" || "$method" == "cot" ]]; then
   MAX_COMPLETION_TOKENS=10000
 fi
 
-python scripts/simple/simple.py \
+python scripts/repeats/repeats.py \
     --benchmark "$benchmark" \
     --method "$method" \
     --model "$model" \
@@ -33,4 +43,5 @@ python scripts/simple/simple.py \
     --provider "$provider" \
     --api_key "$api_key" \
     ${STOP:+--stop "$STOP"} \
-    --value_cache
+    --value_cache \
+    --repeats "$repeats"

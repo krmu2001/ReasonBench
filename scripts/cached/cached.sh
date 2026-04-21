@@ -6,6 +6,7 @@ split="test"
 repeats=5
 
 provider="openai"
+api_key="OPENAI_API_KEY"
 model="gpt-4.1-nano"
 
 # Decoding parameters
@@ -31,6 +32,7 @@ python scripts/repeats/repeats.py \
     --allow_batch_overflow 1 \
     --ns_ratio 0.0 \
     --provider "$provider" \
+    --api_key "$api_key" \
     ${STOP:+--stop "$STOP"} \
     --value_cache \
     --repeats "$repeats"

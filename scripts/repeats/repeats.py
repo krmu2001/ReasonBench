@@ -14,17 +14,18 @@ from cachesaver.pipelines import OnlineAPI
 import sys
 sys.path.append(os.getcwd())
 
-from src import BenchmarkFactory, EnvironmentFactory, MethodFactory
-from src.tasks import *
-from src.methods import *
-from src.models import OnlineLLM, API
-from src.typedefs import DecodingParameters
+from reasonbench import BenchmarkFactory, EnvironmentFactory, MethodFactory
+from reasonbench.tasks import load_task
+from reasonbench.methods import *
+from reasonbench.models import OnlineLLM, API
+from reasonbench.typedefs import DecodingParameters
 
-from src.utils import initial_logging, final_logging
+from reasonbench.utils import initial_logging, final_logging
 
 
 async def run(args, cache_path):
-    
+    load_task(args.benchmark)
+
     # Cache directory
     os.makedirs(os.path.dirname(cache_path), exist_ok=True)
     cache = Cache(cache_path)
@@ -72,7 +73,7 @@ async def run(args, cache_path):
         model=api,
         env=environment,
         config=config)
-    
+
 
     # Benchmark
     benchmark = BenchmarkFactory.get(args.benchmark, split=args.split, max_len=50)
@@ -89,7 +90,7 @@ async def run(args, cache_path):
         api.update_log_path(
             log_path=calls_path
         )
-        
+
         # Initial logging
         if args.reasoning_effort:
             log_path = f"logs/repeats/{args.model}_{args.reasoning_effort}/{args.benchmark}/{args.method}_{args.split}_{i}.log"
@@ -100,7 +101,7 @@ async def run(args, cache_path):
         # Start timing
         start = time.perf_counter()
 
-        # Run the method 
+        # Run the method
         durations, results = await method.benchmark(
             benchmark=benchmark,
             ns_ratio=args.ns_ratio,
@@ -115,7 +116,7 @@ async def run(args, cache_path):
         evaluations = [sorted([environment.evaluate(state) for state in r], key=lambda x: x[1]) for r in results]
         final_logging(logger, api, clocktime, durations, evaluations)
 
-        
+
 
 
 
@@ -123,7 +124,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser("Solve tasks with different methods.")
 
     parser.add_argument("--repeats", type=int)
-    
+
     parser.add_argument("--method", type=str)
     parser.add_argument("--benchmark", type=str)
     parser.add_argument("--dataset_path", type=str)
@@ -149,7 +150,7 @@ if __name__ == "__main__":
 
     if args.ns_ratio > 1.0 or args.ns_ratio < 0.0:
         raise ValueError("ns_ratio must be between 0.0 and 1.0")
-    
+
     cache_path = "caches/developpi"
     if args.reasoning_effort:
         cache_path = f"{cache_path}_{args.reasoning_effort}"

@@ -7,6 +7,7 @@ import os
 import random
 from typing import Tuple, Literal
 from pydantic import BaseModel
+from dotenv import load_dotenv
 
 
 from .state import StateHLE
@@ -16,12 +17,16 @@ from ...typedefs import Environment, MAX_SEED
 
 from openai import OpenAI
 
+load_dotenv()
+
 OBS_CORRECT = "Answer is CORRECT."
 OBS_INCORRECT = "Answer is INCORRECT."
 
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"), timeout=300, max_retries=1)
+# HLE eval uses an OpenAI judge, but non-HLE runs should not need that key.
+_judge_client = None
 cache = Cache(".cache/judge_cache")  # folder on disk
 JUDGE_MODEL = "o3-mini"
+JUDGE_API_KEY="OPENAI_API_KEY"
 
 
 @EnvironmentFactory.register
@@ -32,7 +37,7 @@ class EnvironmentHLE(Environment):
 
     @staticmethod
     def step(state: StateHLE, action: str) -> StateHLE:
-       
+
         # Randomness handling
         random.seed(state.randomness if hasattr(state, 'randomness') else 0)
         randomness = random.randint(0, MAX_SEED)
@@ -99,7 +104,7 @@ class EnvironmentHLE(Environment):
         #is_final = EnvironmentHLE.is_final(state)
         if len(state.steps) == 0:
             return False, 0.0
-        
+
         answer = extract_answer(state.question, state.answer, state.steps[-1])
         if answer and answer.get("correct", "no") == "yes":
             return True, 1.0
@@ -127,13 +132,13 @@ def extract_answer(question, correct_answer, response):
                     messages=[
                         {"role": "user", "content": prompt}
                     ],
-                    response_format=ExtractedAnswer, 
-                ) 
+                    response_format=ExtractedAnswer,
+                )
             content = response.choices[0].message.parsed
             content = [content.extracted_final_answer, content.reasoning, content.correct, content.confidence]
             cache.set(key, content)
 
-        return { 
+        return {
             "correct_answer": correct_answer,
             "model_answer": content[0],
             "reasoning": content[1],
@@ -143,7 +148,23 @@ def extract_answer(question, correct_answer, response):
     except Exception as e: # very, very rare
         print("Error:", e)
         return None
-        
+
+
+def get_judge_client():
+    """
+    Lazily construct the HLE judge client. In order to avoid imports of hle tasks
+    from requiring OPENAI_API_KEY until an HLE evaluation actually needs it.
+    """
+    global _judge_client
+    if _judge_client is None:
+        api_key = os.getenv(JUDGE_API_KEY)
+        if not api_key:
+            raise ValueError(
+                f"HLE evaluation requires {JUDGE_API_KEY}. "
+                f"Add {JUDGE_API_KEY}=... to .env to run HLE tasks"
+            )
+        _judge_client = OpenAI(api_key, timeout=300, max_retries=1)
+    return _judge_client
 
 def parse_action(string: str) -> Tuple[str, str]:
     """
@@ -152,7 +173,7 @@ def parse_action(string: str) -> Tuple[str, str]:
     """
     pattern = r'^(\w+)\[(.+)\]$'
     match = re.match(pattern, string)
-    
+
     if match:
         action_type = match.group(1)
         argument = match.group(2)
@@ -166,17 +187,17 @@ def parse_action(string: str) -> Tuple[str, str]:
 #     if action_type == "Analyze":
 #         # Analyze the image or question content
 #         return f"Analysis of '{argument}': Considering {state.category} category..."
-    
+
 #     elif action_type == "Explain":
 #         # Provide explanation based on rationale
 #         return f"Explanation: {state.rationale if hasattr(state, 'rationale') else 'No rationale available'}"
-    
+
 #     elif action_type == "Finish":
 #         # Check if the answer matches
 #         if argument.lower() == state.answer.lower():
 #             return OBS_CORRECT
 #         return OBS_INCORRECT
-    
+
 #     else:
 #         return 'Invalid Action. Valid Actions are Analyze[<topic>], Explain[<aspect>], and Finish[<answer>].'
 

@@ -1,14 +1,18 @@
 import os
-import asyncio    
+import asyncio
 from typing import List, Any
 from dataclasses import dataclass
 
 from cachesaver.typedefs import Request, Batch, Response
+from dotenv import load_dotenv
 
 from ..typedefs import Model
 
+load_dotenv()
+
 class OnlineLLM(Model):
     def __init__(self, provider: str, max_n: int = 128, api_key: str=None, reasoning_effort=None):
+        self.provider = provider
         self.client = client_init(provider, api_key)
         self.max_n = max_n if provider not in ["groq", "anthropic"] else 1
         self.reasoning_effort = reasoning_effort
@@ -41,11 +45,11 @@ class OnlineLLM(Model):
                     sleep *= 2
 
             input_tokens, completion_tokens = count_tokens(completion)
-            
+
             if getattr(completion.usage, 'prompt_tokens_details', None):
                 try:
                     cached_tokens = completion.usage.prompt_tokens_details.cached_tokens
-                    
+
                 except Exception as e:
                     print(f"Could not access cached tokens: {e}")
                     pass
@@ -59,62 +63,74 @@ class OnlineLLM(Model):
 
         return Response(data=results)
 
-    
     async def batch_request(self, batch: Batch) -> List[Response]:
         requests = [self.request(request) for request in batch.requests]
         completions = await asyncio.gather(*requests)
         return completions
-    
+
 def client_init(provider: str, api_key: str) -> Any:
+    api_key_value = get_api_key(api_key)
+
     # OpenAI - GPT
     if provider == "openai":
         from openai import AsyncOpenAI
-        client = AsyncOpenAI(api_key=os.getenv(api_key))
+        client = AsyncOpenAI(api_key=api_key_value)
         return client
-    
+
     # Google - Gemini
     elif provider == "gemini":
         from openai import AsyncOpenAI
         client = AsyncOpenAI(
-            api_key = os.getenv(api_key),
+            api_key = api_key_value,
             base_url="https://generativelanguage.googleapis.com/v1beta/openai/"
         )
         return client
-    
+
     # Anthropic - Claude
     elif provider == "anthropic":
         from openai import AsyncOpenAI
         client = AsyncOpenAI(
-            api_key = os.getenv(api_key),
+            api_key = api_key_value,
             base_url="https://api.anthropic.com/v1/"
         )
         return client
-    
+
     # Together - HF
     elif provider == "together":
         from together import AsyncTogether
-        client = AsyncTogether(api_key=os.getenv(api_key))
+        client = AsyncTogether(api_key=api_key_value)
         return client
 
     elif provider == "groq":
         from openai import AsyncOpenAI
         client = AsyncOpenAI(
-            api_key = os.getenv(api_key),
+            api_key = api_key_value,
             base_url="https://api.groq.com/openai/v1/"
         )
         return client
-    
-
     else:
         raise ValueError(f"Unknown provider: {provider}")
-    
 
-async def chat_completion(client, prompts, request, current_n, reasoning_effort: str=None):
+def get_api_key(api_key: str) -> str:
+    if not api_key:
+        return None
+
+    api_key_value = os.getenv(api_key)
+    if not api_key_value:
+        raise ValueError(
+            f"Missing API key environment variable '{api_key}'. "
+            f"Add {api_key}=... to .env or export it in your shell"
+        )
+    return api_key_value
+
+async def chat_completion(client, prompts, request, current_n, provider: str,reasoning_effort: str=None):
     model_name = request.kwargs["model"]
     if model_name.startswith(("gemini", "gemma")):
         completion = await google_chat_completion(client, prompts, request, current_n, reasoning_effort)
     elif model_name.startswith(("claude")):
         completion = await anthropic_chat_completion(client, prompts, request, current_n, reasoning_effort)
+    elif provider == "groq":
+        completion = await groq_chat_completion(client,prompts, request)
     else:
         completion = await openai_chat_completion(client, prompts, request, current_n, reasoning_effort)
     return completion
@@ -194,8 +210,6 @@ async def google_chat_completion(client, prompts, request, current_n, reasoning_
         )
     return completion
 
-    
-
 async def openai_chat_completion(client, prompts, request, current_n, reasoning_effort: str=None):
     if reasoning_effort:
         completion = await client.chat.completions.create(
@@ -211,7 +225,7 @@ async def openai_chat_completion(client, prompts, request, current_n, reasoning_
             top_logprobs=request.kwargs.get("top_logprobs", None) or None,
             reasoning_effort=reasoning_effort
         )
-    
+
     else:
         completion = await client.chat.completions.create(
             messages=prompts,
@@ -227,10 +241,28 @@ async def openai_chat_completion(client, prompts, request, current_n, reasoning_
         )
     return completion
 
+async def groq_chat_completion(client, prompts, request):
+    """
+    Call Groq through its OpenAI-compatible chat completion api.
+
+    Groq currently only supports n=1 through its OpenAI SDK shape.
+    It also rejects options such as logprobs/top_logprobs.
+    """
+    completion = await client.chat.completions.create(
+        messages=prompts,
+        model=request.kwargs["model"],
+        n=1, #groq api restriction
+        max_completion_tokens=request.kwargs.get("max_completion_tokens") or None,
+        temperature=request.kwargs.get("temperature", None) or 1,
+        top_p=request.kwargs.get("top_p", None) or 1,
+        seed=request.kwargs.get("seed", None) or None,
+    )
+    return completion
+
 def count_tokens(completion):
     input_tokens = completion.usage.prompt_tokens
     if completion.model.startswith(("gemini", "gemma")):
-        completion_tokens = completion.usage.total_tokens - completion.usage.prompt_tokens 
+        completion_tokens = completion.usage.total_tokens - completion.usage.prompt_tokens
     else:
         completion_tokens = completion.usage.completion_tokens
     return input_tokens, completion_tokens
