@@ -4,7 +4,7 @@ import time
 import random
 import logging
 
-import numpy as np 
+import numpy as np
 import pandas as pd
 
 from argparse import Namespace
@@ -59,7 +59,7 @@ def tokens2cost(tokens: dict, model_name: str) -> dict:
         "meta-llama/Llama-3.2-90B-Vision-Instruct-Turbo" : {"in": 0.88, "out": 0.88},
         "meta-llama/Llama-3.2-11B-Vision-Instruct-Turbo" : {"in": 0.18, "out": 0.18},
         "meta-llama/Llama-3.1-8B-Instruct" : {"in": 0.05, "out": 0.05},  # guesstimated values
-        
+
         # Llama-4 models
         "unsloth/Llama-4-Scout-17B-16E-Instruct" : {"in": 0.15, "out": 0.15},  # guesstimated values
         "unsloth/Llama-4-Maverick-17B-128E-Instruct-FP8" : {"in": 0.15, "out": 0.15},  # guesstimated values
@@ -74,7 +74,7 @@ def tokens2cost(tokens: dict, model_name: str) -> dict:
 
         # GPT-3.5 models
         "gpt-3.5-turbo": {"in": 0.50, "out": 1.50},
-        
+
         # GPT-4.1 models
         "gpt-4.1-nano": {"in": 0.10, "out": 0.40},
         "gpt-4.1-mini": {"in": 0.40, "out": 1.60},
@@ -103,7 +103,9 @@ def tokens2cost(tokens: dict, model_name: str) -> dict:
         # Anthropic models (Claude)
         "claude-haiku-4-5-20251001": {"in": 1.00, "out": 5.00},
 
-
+        # Llama models (Groq)
+        "llama-3.3-70b-versatile": {"in": 0.59, "out": 0.79},
+        "llama-3.1-8b-instant": {"in": 0.05, "out": 0.08},
     }
 
     catalog["llama-3.3-70b-specdec"] = catalog["meta-llama/Llama-3.3-70B-Instruct-Turbo"]
@@ -111,14 +113,14 @@ def tokens2cost(tokens: dict, model_name: str) -> dict:
     catalog["llama-3.1-8b-instruct"] = catalog["meta-llama/Llama-3.1-8B-Instruct"]
     catalog["llama-4-scout-17b"] = catalog["unsloth/Llama-4-Scout-17B-16E-Instruct"]
     catalog["llama-4-maverick-17b"] = catalog["unsloth/Llama-4-Maverick-17B-128E-Instruct-FP8"]
-    
+
     price_in = catalog[model_name]["in"] * tokens["in"] / 1e6
     price_out = catalog[model_name]["out"] * tokens["out"] / 1e6
     return {"in": price_in, "out": price_out, "total": price_in + price_out}
 
-class Resampler: 
+class Resampler:
     def __init__(self, randomness: int):
-        self.randomness = randomness 
+        self.randomness = randomness
 
     def resample(self, state_records, n_picks, resampling_method):
         """
@@ -129,7 +131,7 @@ class Resampler:
             - n_picks: Number of states to resample
             - resampling_method: Method to use for resampling
             - include_init: Whether to include the initial state in the resampling process
-        
+
         Outputs:
             - resampled_states: List of resampled states
             - resampled_indices: List of indices of the resampled states in the original state_records
@@ -138,13 +140,13 @@ class Resampler:
             "linear": Resampler.linear,
             "linear_filtered": Resampler.linear_filtered,
             "max": Resampler.max,
-            "max_unique": Resampler.max_unique, 
+            "max_unique": Resampler.max_unique,
             "percentile": Resampler.percentile
         }
 
         if resampling_method not in methods:
             raise ValueError(f"Invalid resampling method: {resampling_method}\nValid methods: {methods.keys()}")
-        
+
         if n_picks == 0 or len(state_records) == 0:
             return [], []
 
@@ -152,14 +154,14 @@ class Resampler:
         probabilities = methods[resampling_method]([value for _, value, _ in state_records])
         np.random.seed(self.randomness)
         resampled_indices = np.random.choice(range(len(state_records)), size=n_picks, p=probabilities, replace=True).tolist()
-        
+
         # Resample states based on resampled_indices
         random.seed(self.randomness)
         new_randomness = [random.randint(1, 1000) for _ in range(n_picks)]
         self.randomness = new_randomness[-1]
         resampled_states = [state_records[i][2].clone(randomness) for i, randomness in zip(resampled_indices, new_randomness)]
         return resampled_states, resampled_indices
-    
+
     @staticmethod
     def linear(values: List[float])-> List[float]:
         """
@@ -169,7 +171,7 @@ class Resampler:
         values = [value + eps for value in values]
         total = sum(values)
         return [value / total for value in values]
-    
+
     @staticmethod
     def linear_filtered(values: List[float], threshold: float=0.5)-> List[float]:
         """
@@ -191,7 +193,7 @@ class Resampler:
             return Resampler.linear(values)
         else:
             return [value / total for value in values]
-    
+
     @staticmethod
     def max_unique(values: List[float])-> List[float]:
         """
@@ -207,7 +209,7 @@ class Resampler:
             values = [0] * len(values)
             values[first_one_index] = 1
             return values
-    
+
     @staticmethod
     def percentile(values: List[float], percentile: float=0.75) -> List[float]:
         """
@@ -216,14 +218,14 @@ class Resampler:
         threshold = np.percentile(values, percentile)
         values = [value if value >= threshold else 0 for value in values]
         return Resampler.linear(values)
-    
+
 async def timed(label: str, coroutine: Awaitable) -> Tuple[str, float, Any]:
     # Start timing
     start = time.perf_counter()
-    
+
     # Await / Execute the coroutine
     result = await coroutine
-    
+
     # End timing
     end = time.perf_counter()
     duration = end - start
@@ -231,8 +233,8 @@ async def timed(label: str, coroutine: Awaitable) -> Tuple[str, float, Any]:
     return label, duration, result
 
 def api_logging(
-        logger: logging.Logger, 
-        prompt: Any, 
+        logger: logging.Logger,
+        prompt: Any,
         n: int,
         response: List[str]
         ):
@@ -263,22 +265,22 @@ def starbox(text: str) -> str:
     middle = f"* {text} *"
     # Bottom border
     bottom = "*" * width
-    
+
     return f"{top}\n{middle}\n{bottom}"
 
 def initial_logging(
-        logger: logging.Logger, 
-        args:Namespace, 
+        logger: logging.Logger,
+        args:Namespace,
         log_path: str
         ):
-    
+
     os.makedirs(os.path.dirname(log_path), exist_ok=True)
 
     # Removing potential previous handlers
     for handler in logger.handlers[:]:
         logger.removeHandler(handler)
         handler.close()
-    
+
     # Setting up new handler
     f_handler = logging.FileHandler(log_path, mode="w", encoding="utf-8")
     f_handler.setLevel(logging.INFO)
@@ -300,7 +302,7 @@ def initial_logging(
         else:
             logger.info(f"\t{key}: {value}")
     logger.info("\n")
-    
+
 
     logger.info("LLM Information:")
     logger.info("\tProvider: '%s'", args.provider)
@@ -319,10 +321,10 @@ def initial_logging(
 
 # TODO: Clarify types in definition: Importing creates circular import
 def final_logging(
-        logger: logging.Logger, 
-        api: "src.models.API", 
-        clocktime: float, 
-        durations: List[float], 
+        logger: logging.Logger,
+        api: "reasonbench.models.API",
+        clocktime: float,
+        durations: List[float],
         evaluations: List[Any]
         ):
 
@@ -357,7 +359,7 @@ def final_logging(
             logger.info("\t\tCost (total): %s", {"in": cost["total"]["in"], "out": cost["total"]["out"], "total": cost["total"]["total"]})
             logger.info("\t\tCost (saved by cacher): %s", {"in": cost["cacher"]["in"], "out": cost["cacher"]["out"], "total": cost["cacher"]["total"]})
             logger.info("\t\tCost (saved by deduplicator): %s\n", {"in": cost["duplicator"]["in"], "out": cost["duplicator"]["out"], "total": cost["duplicator"]["total"]})
-    
+
 
     # All tab information
     logger.info("All Tabs:")
@@ -388,9 +390,6 @@ def final_logging(
     logger.info("\tCost (saved by cacher): %s", {"in": all_cost["cacher"]["in"], "out": all_cost["cacher"]["out"], "total": all_cost["cacher"]["total"]})
     logger.info("\tCost (saved by deduplicator): %s\n", {"in": all_cost["duplicator"]["in"], "out": all_cost["duplicator"]["out"], "total": all_cost["duplicator"]["total"]})
 
-
-
-    
     # Total duration
     logger.info("Duration:")
     logger.info("\tTotal clocktime (in seconds): %f", clocktime)

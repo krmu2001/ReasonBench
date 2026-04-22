@@ -21,46 +21,46 @@ Key findings from our evaluation:
 
 We implement 10 representative reasoning strategies using a standardized interface:
 
-| Strategy | Type | Reference |
-|----------|------|-----------|
-| **IO** | Direct | — |
-| **CoT** | Direct | Wei et al., 2022 |
-| **CoT-SC** | Direct | Wang et al., 2023 |
-| **ReAct** | Adaptive | Yao et al., 2023b |
-| **Reflexion** | Adaptive | Shinn et al., 2023 |
-| **ToT-BFS** | Structured | Yao et al., 2023a |
-| **ToT-DFS** | Structured | Yao et al., 2023a |
-| **GoT** | Structured | Besta et al., 2024 |
-| **RAP** | Planning | Hao et al., 2023 |
-| **FoA** | Evolutionary | Klein et al., 2025 |
+| Strategy      | Type         | Reference          |
+| ------------- | ------------ | ------------------ |
+| **IO**        | Direct       | —                  |
+| **CoT**       | Direct       | Wei et al., 2022   |
+| **CoT-SC**    | Direct       | Wang et al., 2023  |
+| **ReAct**     | Adaptive     | Yao et al., 2023b  |
+| **Reflexion** | Adaptive     | Shinn et al., 2023 |
+| **ToT-BFS**   | Structured   | Yao et al., 2023a  |
+| **ToT-DFS**   | Structured   | Yao et al., 2023a  |
+| **GoT**       | Structured   | Besta et al., 2024 |
+| **RAP**       | Planning     | Hao et al., 2023   |
+| **FoA**       | Evolutionary | Klein et al., 2025 |
 
 ## Benchmarks
 
 6 tasks spanning diverse reasoning domains:
 
-| Task | Domain | Metric | Size |
-|------|--------|--------|------|
-| **Game of 24** | Mathematical reasoning | Accuracy | 100 |
-| **SciBench** | Scientific reasoning | Accuracy (exact match) | 109 |
-| **HumanEval** | Code generation | pass@1 | 100 |
-| **HotPotQA** | Multi-hop QA | Exact match | 100 |
-| **Sonnet Writing** | Creative writing | Accuracy (rhyme + words) | 50 |
-| **HLE** | General reasoning (Humanity's Last Exam) | Accuracy | 50 |
+| Task               | Domain                                   | Metric                   | Size |
+| ------------------ | ---------------------------------------- | ------------------------ | ---- |
+| **Game of 24**     | Mathematical reasoning                   | Accuracy                 | 100  |
+| **SciBench**       | Scientific reasoning                     | Accuracy (exact match)   | 109  |
+| **HumanEval**      | Code generation                          | pass@1                   | 100  |
+| **HotPotQA**       | Multi-hop QA                             | Exact match              | 100  |
+| **Sonnet Writing** | Creative writing                         | Accuracy (rhyme + words) | 50   |
+| **HLE**            | General reasoning (Humanity's Last Exam) | Accuracy                 | 50   |
 
 ## Evaluated Models
 
 10 contemporary reasoning models from 6 providers:
 
-| Model | Provider |
-|-------|----------|
-| GPT-4.1 Nano, GPT-4.1 Mini | OpenAI |
-| GPT-5 Nano, GPT-5 Mini | OpenAI |
-| GPT-OSS 120B | Together AI |
-| DeepSeek R1 | Together AI |
-| Llama 4 Maverick | Together AI |
-| Qwen3-235B Thinking | Together AI |
-| Claude Haiku 4.5 | Anthropic |
-| Gemini 3 Flash | Google |
+| Model                      | Provider    |
+| -------------------------- | ----------- |
+| GPT-4.1 Nano, GPT-4.1 Mini | OpenAI      |
+| GPT-5 Nano, GPT-5 Mini     | OpenAI      |
+| GPT-OSS 120B               | Together AI |
+| DeepSeek R1                | Together AI |
+| Llama 4 Maverick           | Together AI |
+| Qwen3-235B Thinking        | Together AI |
+| Claude Haiku 4.5           | Anthropic   |
+| Gemini 3 Flash             | Google      |
 
 ## Setup
 
@@ -74,11 +74,10 @@ You also need [CacheSaver](https://github.com/au-clan/cachesaver) — a client-s
 pip install cachesaver
 ```
 
-Set your API keys as environment variables:
+Create a `.env` file from `.env.example` and fill in the keys for the providers you use:
 
 ```bash
-export OPENAI_API_KEY="sk-..."
-# and/or other provider keys
+cp .env.example .env
 ```
 
 ## Quick Start
@@ -114,14 +113,14 @@ python scripts/simple/simple.py \
 
 ### Key arguments
 
-| Argument | Description |
-|----------|-------------|
-| `--benchmark` | Task name: `game24`, `humaneval`, `hotpotqa`, `scibench`, `hle`, `sonnetwriting` |
-| `--method` | Reasoning method: `io`, `cot`, `cot_sc`, `foa`, `tot_bfs`, `tot_dfs`, `got`, `react`, `rap` |
-| `--split` | Dataset split: `train`, `validation`, `test`, `mini` |
-| `--provider` | LLM provider: `openai`, `gemini`, `anthropic`, `groq`, `together` |
-| `--model` | Model identifier (e.g., `gpt-4.1-nano`, `claude-haiku-4-5`) |
-| `--ns_ratio` | Namespace ratio (0.0–1.0) for controlling parallel execution |
+| Argument      | Description                                                                                 |
+| ------------- | ------------------------------------------------------------------------------------------- |
+| `--benchmark` | Task name: `game24`, `humaneval`, `hotpotqa`, `scibench`, `hle`, `sonnetwriting`            |
+| `--method`    | Reasoning method: `io`, `cot`, `cot_sc`, `foa`, `tot_bfs`, `tot_dfs`, `got`, `react`, `rap` |
+| `--split`     | Dataset split: `train`, `validation`, `test`, `mini`                                        |
+| `--provider`  | LLM provider: `openai`, `gemini`, `anthropic`, `groq`, `together`                           |
+| `--model`     | Model identifier (e.g., `gpt-4.1-nano`, `claude-haiku-4-5`)                                 |
+| `--ns_ratio`  | Namespace ratio (0.0–1.0) for controlling parallel execution                                |
 
 ## Evaluation Metrics
 
@@ -167,7 +166,7 @@ ReasonBENCH is organized around four core abstractions:
 - **Model** — uniform interface for LLM providers, supporting async execution and integrated with CacheSaver for response caching and deduplication.
 
 ```
-src/
+reasonbench/
 ├── models/          # LLM provider adapters (OpenAI, Anthropic, Groq, Together, Gemini)
 ├── methods/         # Reasoning strategy implementations
 ├── tasks/           # Task definitions (state, environment, agents, prompts)

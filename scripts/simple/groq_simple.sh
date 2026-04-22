@@ -1,12 +1,21 @@
 #!/bin/bash
 
 benchmark="game24"
-method="tot_bfs"
-split="mini"
+method="io"
+split="single"
 
-provider="openai"
-api_key="OPENAI_API_KEY"
-model="gpt-4.1-nano"
+provider="groq"
+api_key="GROQ_API_KEY"
+
+# Free tier limits:
+#   TPM - 6K
+#   TPD - 500K
+#model="llama-3.1-8b-instant"
+
+# Free tier limits:
+#   TPM - 12K
+#   TPD - 100K
+model="llama-3.3-70b-versatile"
 
 # Decoding parameters
 source scripts/configs/$benchmark.env
