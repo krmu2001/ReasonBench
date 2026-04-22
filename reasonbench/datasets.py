@@ -20,6 +20,7 @@ DATASET_FILES = {
     "matharena": "dataset_matharena.jsonl.gz",
     "scibench": "dataset_scibench.csv.gz",
     "sonnetwriting": "dataset_sonnetwriting.jsonl.gz",
+    "judgelm": "dataset_judgelm.jsonl",
 }
 
 

@@ -22,6 +22,9 @@ from reasonbench.typedefs import DecodingParameters
 
 from reasonbench.utils import initial_logging, final_logging
 
+#TODO: only imported for checking env stuff for judgeLM
+from reasonbench.tasks.judgelm.environment import parse_scores, translate_score_to_win
+
 
 async def run(args, trial, cache_path):
     load_task(args.benchmark)
@@ -47,7 +50,8 @@ async def run(args, trial, cache_path):
     api = API(
         pipeline=pipeline,
         model=args.model,
-        log_path=f"logs/raw_calls/simple/{args.model}/{args.benchmark}/{args.method}_{args.split}.log"
+        log_path=args.raw_calls_log_path
+        # log_path=f"logs/raw_calls/simple/{args.model}/{args.benchmark}/{args.method}_{args.split}.log"
     )
 
     # Decoding Parameters
@@ -79,7 +83,8 @@ async def run(args, trial, cache_path):
     benchmark = BenchmarkFactory.get(args.benchmark, split=args.split, max_len=50)
 
     # Initial logging
-    log_path = f"logs/simple/{args.model}/{args.benchmark}/{args.method}_{args.split}.log"
+    # log_path = f"logs/simple/{args.model}/{args.benchmark}/{args.method}_{args.split}.log"
+    log_path = args.framework_log_path
     initial_logging(logger, args, log_path)
 
     # Start timing
@@ -91,6 +96,21 @@ async def run(args, trial, cache_path):
         ns_ratio=args.ns_ratio,
         **({"value_cache": True} if bool(args.value_cache) else {})
     )
+
+    # # TODO: block below is just judgeLM test printing stuff
+    # for i, run in enumerate(results):
+    #     print(f"\n === SAMPLE {i} ===")
+    #     for state in run:
+    #         print("RAW OUTPUT:")
+    #         print(state.current_state)
+
+    #         print("\nPARSED:")
+    #         parsed = parse_scores(state.current_state)
+    #         print(parsed)
+
+    #         print("\nWIN:")
+    #         score_1, score_2, _ = parsed
+    #         print(translate_score_to_win(score_1, score_2))
 
     # End timing
     end = time.perf_counter()
@@ -125,9 +145,12 @@ if __name__ == "__main__":
     parser.add_argument("--allow_batch_overflow", type=int)
     parser.add_argument("--ns_ratio", type=float)
     parser.add_argument("--correctness", type=int)
+    parser.add_argument("--framework_log_path", type=str)
+    parser.add_argument("--raw_calls_log_path", type=str)
+    parser.add_argument("--cache_path", type=str, default="caches/developping")
     args = parser.parse_args()
 
     if args.ns_ratio > 1.0 or args.ns_ratio < 0.0:
         raise ValueError("ns_ratio must be between 0.0 and 1.0")
 
-    asyncio.run(run(args, trial=0, cache_path="caches/developping"))
+    asyncio.run(run(args, trial=0, cache_path=args.cache_path))

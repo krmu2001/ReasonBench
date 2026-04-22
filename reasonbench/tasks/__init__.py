@@ -10,6 +10,7 @@ TASK_MODULES = {
   "matharena": "reasonbench.tasks.matharena",
   "scibench": "reasonbench.tasks.scibench",
   "sonnetwriting": "reasonbench.tasks.sonnetwriting",
+  "judgelm": "reasonbench.tasks.judgelm",
 }
 
 
